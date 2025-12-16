@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/extensions.dart';
@@ -22,6 +21,8 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
   final Random _random = Random();
   late final Vector2 _screenSize;
 
+  double get boxSize => _size;
+
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
@@ -38,25 +39,35 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
       _size,
       _screenSize.x,
     );
-    return Vector2(randomXPosition, _size/2);
+    return Vector2(randomXPosition, _size / 2);
   }
 
   void _setXAxisVelocity() {
-    _velocity = Vector2(2, 0);
+    _velocity = Vector2(200, 0);
   }
 
   void _handleEdgeCollision() {
-    if (position.x - _size/2 <= 0) {
+    if (position.x - _size / 2 <= 0) {
       _velocity *= -1;
     }
-    if (position.x + _size/2 >= _screenSize.x) {
+    if (position.x + _size / 2 >= _screenSize.x) {
       _velocity *= -1;
     }
+  }
+
+  void drop() {
+    _velocity = Vector2.zero();
+    _velocity = Vector2(0, 200);
+  }
+
+  void stopFalling() {
+    _velocity = Vector2.zero();
   }
 
   @override
   void update(double dt) {
-    position += _velocity;
+    position += _velocity * dt;
+    // Handle collision when box touches edge of screen X axis
     _handleEdgeCollision();
     super.update(dt);
   }
