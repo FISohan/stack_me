@@ -21,7 +21,7 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
   final Random _random = Random();
   late final Vector2 _screenSize;
   BoxState _state = BoxState.notDroped;
-late Vector2 prevPosition;
+  late Vector2 prevPosition;
 
   double get boxSize => _size;
   BoxState get state => _state;
@@ -53,9 +53,17 @@ late Vector2 prevPosition;
 
   void _handleEdgeCollision() {
     if (position.x - _size / 2 <= 0) {
+      final bool crossed = (position.x - _size / 2) < 0;
+      if (crossed) {
+        position.x = _size / 2;
+      }
       _velocity *= -1;
     }
     if (position.x + _size / 2 >= _screenSize.x) {
+      final bool crossed = (position.x + _size / 2) > _screenSize.x;
+      if (crossed) {
+        position.x = _screenSize.x - (_size / 2);
+      }
       _velocity *= -1;
     }
   }
@@ -72,7 +80,7 @@ late Vector2 prevPosition;
 
   @override
   void update(double dt) {
-      prevPosition = position.clone();
+    prevPosition = position.clone();
 
     position += _velocity * dt;
     // Handle collision when box touches edge of screen X axis
@@ -80,7 +88,6 @@ late Vector2 prevPosition;
     super.update(dt);
   }
 
-  
   @override
   void render(Canvas canvas) {
     canvas.drawRect(
@@ -89,7 +96,7 @@ late Vector2 prevPosition;
         ..style = PaintingStyle.fill
         ..color = Colors.red,
     );
-       canvas.drawRect(
+    canvas.drawRect(
       Rect.fromCenter(center: Offset.zero, width: _size, height: _size),
       Paint()
         ..style = PaintingStyle.stroke
