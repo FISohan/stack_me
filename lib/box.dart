@@ -20,8 +20,13 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
   final double _size = 40.0;
   final Random _random = Random();
   late final Vector2 _screenSize;
+  BoxState _state = BoxState.notDroped;
+late Vector2 prevPosition;
 
   double get boxSize => _size;
+  BoxState get state => _state;
+  Vector2 get velocity => _velocity;
+  void updateBoxState(BoxState state) => _state = state;
 
   @override
   FutureOr<void> onLoad() async {
@@ -57,7 +62,8 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
 
   void drop() {
     _velocity = Vector2.zero();
-    _velocity = Vector2(0, 200);
+    _velocity = Vector2(0, 400);
+    _state = BoxState.falling;
   }
 
   void stopFalling() {
@@ -66,12 +72,15 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
 
   @override
   void update(double dt) {
+      prevPosition = position.clone();
+
     position += _velocity * dt;
     // Handle collision when box touches edge of screen X axis
     _handleEdgeCollision();
     super.update(dt);
   }
 
+  
   @override
   void render(Canvas canvas) {
     canvas.drawRect(
@@ -80,12 +89,14 @@ class Box extends PositionComponent with HasGameReference<FlameGame> {
         ..style = PaintingStyle.fill
         ..color = Colors.red,
     );
-    // Draw anchor
-    canvas.drawCircle(
-      Offset(anchor.x, anchor.y),
-      3,
-      Paint()..color = Colors.blue,
+       canvas.drawRect(
+      Rect.fromCenter(center: Offset.zero, width: _size, height: _size),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..color = Colors.white,
     );
     super.render(canvas);
   }
 }
+
+enum BoxState { notDroped, falling, onTheGround }
